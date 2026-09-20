@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Will You Be My Valentine?</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- Background Music (Optional, user initiates) -->
+    <!-- <audio id="bg-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio> -->
+
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- UI Overlay -->
+        <div id="ui-layer">
+            <div id="score-board">
+                <span>❤️ Love Meter: </span>
+                <div class="progress-bar">
+                    <div id="love-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <h1>Catch the Love!</h1>
+            <p>Catch enough hearts to reveal a special question...</p>
+            <button id="start-btn" class="btn">Start Game</button>
+        </div>
+
+        <!-- Proposal Modal (Hidden initially) -->
+        <div id="proposal-screen" class="screen hidden">
+            <div class="proposal-content">
+                <h1>Will You Be My Valentine?</h1>
+                <p class="sub-text">You caught my heart! Now I have to ask...</p>
+                <div class="buttons">
+                    <button id="yes-btn" class="btn yes-btn">YES!</button>
+                    <button id="no-btn" class="btn no-btn">No</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Celebration Overlay -->
+        <div id="celebration-screen" class="screen hidden">
+            <h1>Happy Propose Day! 💍</h1>
+            <p>I love you!</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
