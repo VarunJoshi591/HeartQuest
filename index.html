@@ -7,17 +7,257 @@
     <title>Will You Be My Valentine?</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@400;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --primary-color: #ff4d6d;
+            --secondary-color: #ff8fa3;
+            --accent-color: #c9184a;
+            --bg-gradient: linear-gradient(135deg, #fff0f3 0%, #ffccd5 100%);
+            --white: #ffffff;
+            --font-heading: 'Great Vibes', cursive, sans-serif;
+            --font-body: 'Poppins', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            font-family: var(--font-body);
+            background: var(--bg-gradient);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+
+        /* UI Layer */
+        #ui-layer {
+            position: absolute;
+            top: max(15px, env(safe-area-inset-top, 15px));
+            left: max(15px, env(safe-area-inset-left, 15px));
+            z-index: 10;
+            pointer-events: none;
+            max-width: calc(100% - 30px);
+        }
+
+        #score-board {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 8px 16px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(255, 77, 109, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: clamp(0.85rem, 3vw, 1rem);
+            color: var(--accent-color);
+            white-space: nowrap;
+        }
+
+        .progress-bar {
+            width: clamp(90px, 25vw, 150px);
+            height: 14px;
+            background: #ffe5ec;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--secondary-color);
+            flex-shrink: 0;
+        }
+
+        #love-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transition: width 0.3s ease-out;
+        }
+
+        /* Screens */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 240, 243, 0.92);
+            z-index: 20;
+            transition: opacity 0.5s ease;
+            padding: max(20px, env(safe-area-inset-top, 20px)) max(20px, env(safe-area-inset-right, 20px)) max(20px, env(safe-area-inset-bottom, 20px)) max(20px, env(safe-area-inset-left, 20px));
+            text-align: center;
+        }
+
+        .screen.hidden {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            display: none !important;
+        }
+
+        .screen.active {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+            display: flex !important;
+        }
+
+        h1 {
+            font-family: var(--font-heading);
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            color: var(--accent-color);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            text-align: center;
+            line-height: 1.2;
+            padding: 0 10px;
+            word-break: break-word;
+        }
+
+        p {
+            font-size: clamp(0.95rem, 3.5vw, 1.25rem);
+            color: #590d22;
+            margin-bottom: 25px;
+            text-align: center;
+            max-width: 500px;
+            padding: 0 10px;
+            line-height: 1.4;
+        }
+
+        .btn {
+            padding: clamp(12px, 3.5vw, 15px) clamp(30px, 8vw, 40px);
+            font-size: clamp(1rem, 3.5vw, 1.2rem);
+            font-family: var(--font-body);
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 5px 15px rgba(201, 24, 74, 0.3);
+            touch-action: manipulation;
+            min-height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(201, 24, 74, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        #start-btn {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .proposal-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            max-width: 90%;
+            width: 480px;
+        }
+
+        .proposal-content .sub-text {
+            margin-bottom: 25px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            max-width: 100%;
+        }
+
+        .yes-btn {
+            background: #2dc653;
+            color: white;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            padding: clamp(14px, 4vw, 20px) clamp(35px, 9vw, 60px);
+        }
+
+        .no-btn {
+            background: #ffb703;
+            color: white;
+            position: relative;
+            transition: all 0.2s;
+            font-size: clamp(1rem, 3.5vw, 1.2rem);
+        }
+
+        @media (max-width: 360px) {
+            #score-board {
+                padding: 6px 12px;
+                gap: 6px;
+            }
+            .buttons {
+                gap: 10px;
+            }
+        }
+
+        @media (max-height: 500px) and (orientation: landscape) {
+            h1 {
+                font-size: clamp(2rem, 7vh, 3rem);
+                margin-bottom: 8px;
+            }
+            p {
+                font-size: clamp(0.85rem, 3vh, 1rem);
+                margin-bottom: 15px;
+            }
+            .btn {
+                padding: 8px 25px;
+                min-height: 40px;
+            }
+            .yes-btn {
+                padding: 10px 35px;
+            }
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            15% { transform: scale(1.1); }
+            30% { transform: scale(1); }
+            45% { transform: scale(1.1); }
+            60% { transform: scale(1); }
+        }
+
+        .proposal-content h1 {
+            animation: heartbeat 2s infinite;
+        }
+    </style>
 </head>
 
 <body>
-    <!-- Background Music (Optional, user initiates) -->
-    <!-- <audio id="bg-music" loop>
-        <source src="music.mp3" type="audio/mpeg">
-    </audio> -->
-
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
 
@@ -58,6 +298,301 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game State
+        let gameState = 'START'; // START, PLAYING, WON, PROPOSAL, END
+        let score = 0;
+        const WIN_SCORE = 15; // Hearts needed to fill the meter
+        let player;
+        let hearts = [];
+        let particles = []; // For effects
+        let animationId;
+        let loveMeter = document.getElementById('love-fill');
+
+        // DOM Elements
+        const startScreen = document.getElementById('start-screen');
+        const proposalScreen = document.getElementById('proposal-screen');
+        const celebrationScreen = document.getElementById('celebration-screen');
+        const startBtn = document.getElementById('start-btn');
+        const yesBtn = document.getElementById('yes-btn');
+        const noBtn = document.getElementById('no-btn');
+
+        // Resize Handling
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if (player) {
+                player.recalculateDimensions();
+            }
+        }
+        window.addEventListener('resize', resize);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(resize, 100);
+        });
+
+        // Player Object
+        class Player {
+            constructor() {
+                this.recalculateDimensions();
+                this.x = canvas.width / 2 - this.w / 2;
+                this.speed = 10;
+                this.dx = 0;
+            }
+
+            recalculateDimensions() {
+                this.w = Math.min(100, Math.max(65, canvas.width * 0.18));
+                this.h = this.w * 0.8;
+                this.y = canvas.height - Math.max(70, canvas.height * 0.12);
+                
+                if (this.x !== undefined) {
+                    if (this.x < 0) this.x = 0;
+                    if (this.x + this.w > canvas.width) this.x = canvas.width - this.w;
+                }
+            }
+
+            draw() {
+                ctx.fillStyle = '#ff4d6d';
+                ctx.beginPath();
+                ctx.arc(this.x + this.w / 2, this.y, this.w / 2, 0, Math.PI, false);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.strokeStyle = '#c9184a';
+                ctx.lineWidth = Math.max(3, this.w * 0.05);
+                ctx.arc(this.x + this.w / 2, this.y - 10, this.w / 2, Math.PI, 0, false);
+                ctx.stroke();
+            }
+
+            update() {
+                this.x += this.dx;
+                if (this.x < 0) this.x = 0;
+                if (this.x + this.w > canvas.width) this.x = canvas.width - this.w;
+            }
+        }
+
+        // Heart Object
+        class Heart {
+            constructor() {
+                const minSize = Math.max(18, canvas.width * 0.04);
+                const maxSize = Math.min(40, canvas.width * 0.08);
+                this.size = Math.random() * (maxSize - minSize) + minSize;
+                this.x = Math.random() * Math.max(10, canvas.width - this.size);
+                this.y = -this.size;
+                this.speed = Math.random() * 3 + 2;
+                this.color = `hsl(${Math.random() * 20 + 340}, 100%, 60%)`;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                let topCurveHeight = this.size * 0.3;
+                ctx.moveTo(this.x, this.y + topCurveHeight);
+                ctx.bezierCurveTo(
+                    this.x, this.y, 
+                    this.x - this.size / 2, this.y, 
+                    this.x - this.size / 2, this.y + topCurveHeight
+                );
+                ctx.bezierCurveTo(
+                    this.x - this.size / 2, this.y + (this.size + topCurveHeight) / 2, 
+                    this.x, this.y + (this.size + topCurveHeight) / 2, 
+                    this.x, this.y + this.size
+                );
+                ctx.bezierCurveTo(
+                    this.x, this.y + (this.size + topCurveHeight) / 2, 
+                    this.x + this.size / 2, this.y + (this.size + topCurveHeight) / 2, 
+                    this.x + this.size / 2, this.y + topCurveHeight
+                );
+                ctx.bezierCurveTo(
+                    this.x + this.size / 2, this.y, 
+                    this.x, this.y, 
+                    this.x, this.y + topCurveHeight
+                );
+                ctx.fill();
+            }
+
+            update() {
+                this.y += this.speed;
+            }
+        }
+
+        // Particle Effect
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 5 + 2;
+                this.speedX = (Math.random() - 0.5) * 4;
+                this.speedY = (Math.random() - 0.5) * 4;
+                this.life = 100;
+                this.color = `rgba(255, 255, 255, 0.8)`;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.life -= 2;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = Math.max(0, this.life / 100);
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // Input Handling
+        function handleInput(e) {
+            if (!player || gameState !== 'PLAYING') return;
+            
+            let clientX;
+            if (e.type === 'touchstart' || e.type === 'touchmove') {
+                if (e.touches && e.touches.length > 0) {
+                    clientX = e.touches[0].clientX;
+                }
+            } else if (e.type === 'mousemove') {
+                clientX = e.clientX;
+            }
+
+            if (clientX !== undefined) {
+                player.x = clientX - player.w / 2;
+                if (player.x < 0) player.x = 0;
+                if (player.x + player.w > canvas.width) player.x = canvas.width - player.w;
+            }
+        }
+
+        window.addEventListener('mousemove', handleInput);
+        window.addEventListener('touchstart', handleInput, { passive: true });
+        window.addEventListener('touchmove', handleInput, { passive: true });
+
+        // Game Functions
+        function spawnHeart() {
+            if (Math.random() < 0.025) {
+                hearts.push(new Heart());
+            }
+        }
+
+        function updateGame() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (gameState === 'PLAYING') {
+                player.update();
+                player.draw();
+
+                spawnHeart();
+
+                hearts.forEach((heart, index) => {
+                    heart.update();
+                    heart.draw();
+
+                    if (
+                        heart.y + heart.size >= player.y - 10 &&
+                        heart.y <= player.y + 20 &&
+                        heart.x + heart.size / 2 >= player.x - 10 &&
+                        heart.x - heart.size / 2 <= player.x + player.w + 10
+                    ) {
+                        hearts.splice(index, 1);
+                        score++;
+                        createParticles(heart.x, heart.y);
+                        updateScore();
+                        
+                        if (score >= WIN_SCORE) {
+                            triggerProposal();
+                        }
+                    } else if (heart.y > canvas.height + heart.size) {
+                        hearts.splice(index, 1);
+                    }
+                });
+
+                particles.forEach((p, idx) => {
+                    p.update();
+                    p.draw();
+                    if (p.life <= 0) particles.splice(idx, 1);
+                });
+            }
+
+            animationId = requestAnimationFrame(updateGame);
+        }
+
+        function createParticles(x, y) {
+            for (let i = 0; i < 6; i++) {
+                particles.push(new Particle(x, y));
+            }
+        }
+
+        function updateScore() {
+            const percentage = Math.min(100, (score / WIN_SCORE) * 100);
+            loveMeter.style.width = `${percentage}%`;
+        }
+
+        function triggerProposal() {
+            gameState = 'PROPOSAL';
+            setTimeout(() => {
+                proposalScreen.classList.remove('hidden');
+                proposalScreen.classList.add('active');
+            }, 400);
+        }
+
+        function startGame() {
+            resize();
+            player = new Player();
+            hearts = [];
+            particles = [];
+            score = 0;
+            updateScore();
+            gameState = 'PLAYING';
+            
+            startScreen.classList.remove('active');
+            startScreen.classList.add('hidden');
+            
+            if (animationId) cancelAnimationFrame(animationId);
+            updateGame();
+        }
+
+        // Event Listeners
+        startBtn.addEventListener('click', startGame);
+
+        yesBtn.addEventListener('click', () => {
+            proposalScreen.classList.remove('active');
+            proposalScreen.classList.add('hidden');
+            celebrationScreen.classList.remove('hidden');
+            celebrationScreen.classList.add('active');
+            triggerConfetti();
+        });
+
+        function moveNoButton(e) {
+            if (e && e.cancelable) e.preventDefault();
+            
+            const margin = 20;
+            const btnWidth = noBtn.offsetWidth || 80;
+            const btnHeight = noBtn.offsetHeight || 40;
+            
+            const maxX = Math.max(margin, window.innerWidth - btnWidth - margin);
+            const maxY = Math.max(margin, window.innerHeight - btnHeight - margin);
+            
+            const randomX = Math.floor(Math.random() * (maxX - margin)) + margin;
+            const randomY = Math.floor(Math.random() * (maxY - margin)) + margin;
+            
+            noBtn.style.position = 'fixed';
+            noBtn.style.left = `${randomX}px`;
+            noBtn.style.top = `${randomY}px`;
+            noBtn.style.zIndex = '30';
+        }
+
+        noBtn.addEventListener('mouseover', moveNoButton);
+        noBtn.addEventListener('touchstart', moveNoButton, { passive: false });
+
+        function triggerConfetti() {
+            for (let i = 0; i < 40; i++) {
+                particles.push(new Particle(canvas.width / 2, canvas.height / 2));
+            }
+        }
+
+        resize();
+    </script>
 </body>
 
-</html>
+</html>
